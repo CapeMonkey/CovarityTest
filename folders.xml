@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<root>
+	<folder name="App_Start">
+		<folder name="Shared"/>
+	</folder>	
+	<folder name="Public"></folder>	
+	<folder name="Scripts">
+		<folder name="css"/>
+		<folder name="js"/>
+	</folder>	
+</root>
