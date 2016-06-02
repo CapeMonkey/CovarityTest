@@ -84,7 +84,7 @@ if($missingVars.length -ne 0) {
     } else {
         $msg | Add-Content $logfile
     }
-    return
+    exit -1
 }
 
 # Teardown Website if desired
@@ -101,7 +101,7 @@ if ($Teardown) {
         } else {
             $msg | Add-Content $logfile
         }    
-        return
+        exit
     }
 
     Remove-Website -Name $websiteName
@@ -123,7 +123,7 @@ if ($Teardown) {
         } else {
             $msg | Add-Content $logfile
         }    
-        return
+        exit
     }
 
 
@@ -158,7 +158,7 @@ if ($Teardown) {
         }        
     }
 
-    return
+    exit
 }
 
 # Verify that App Pool and Website don't exist
@@ -171,7 +171,7 @@ if (Test-Path "IIS:\AppPools\$appPoolName") {
     } else {
         $msg | Add-Content $logfile
     }    
-    return
+    exit -1
 }
 
 if (Test-Path "IIS:\sites\$websiteName") {
@@ -182,13 +182,25 @@ if (Test-Path "IIS:\sites\$websiteName") {
     } else {
         $msg | Add-Content $logfile
     }    
-    return
+    exit -1
 }
 
 # Setup Directories
 
-[xml]$dirXml = Get-Content $directoryDefnFile
-[System.Xml.XmlElement] $root = $dirXml.get_DocumentElement()
+try {
+    [xml]$dirXml = Get-Content $directoryDefnFile
+    [System.Xml.XmlElement] $root = $dirXml.get_DocumentElement()
+} catch {
+    $tim = (Get-Date).toString()
+    $msg = "$tim Aborting: $directoryDefnFile does not exist or is not XML`n"
+    $msg += $error[0]
+    if ($logToConsole) {
+        Write-Host $msg
+    } else {
+        $msg | Add-Content $logfile
+    }    
+    exit -1
+}
 
 if (!(Test-Path $directory)) {
     mkdir $directory
@@ -200,7 +212,7 @@ if (!(Test-Path $directory)) {
     } else {
         $msg | Add-Content $logfile
     }    
-    return    
+    exit -1    
 }
 
 foreach ($subdirDef in $root.folder) {
